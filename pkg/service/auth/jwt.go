@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"square-pos/pkg/config"
 	"square-pos/pkg/types"
+	"square-pos/pkg/utils"
 	"strconv"
 	"time"
 
@@ -61,7 +63,7 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 }
 
 func CreateJWT(secret []byte, userID int) (string, error) {
-	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
+	expiration := time.Second * time.Duration(config.Envs.JWTExpirationInSeconds)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    strconv.Itoa(int(userID)),
@@ -82,7 +84,7 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(configs.Envs.JWTSecret), nil
+		return []byte(config.Envs.JWTSecret), nil
 	})
 }
 

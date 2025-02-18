@@ -13,7 +13,9 @@ func InitializeRoutes(db *gorm.DB) *mux.Router {
 	router := mux.NewRouter()
 
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
-	userHandler := user.NewHandler()
+
+	userStore := user.NewStore(db)
+	userHandler := user.NewHandler(userStore)
 
 	userHandler.RegisterRoutes(subRouter)
 	log.Println("Server started............")
