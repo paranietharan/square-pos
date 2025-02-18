@@ -15,11 +15,10 @@ func TestUserServiceHandlers(t *testing.T) {
 	userStore := &mockUserStore{}
 	handler := NewHandler(userStore)
 
-	t.Run("should fail if the user ID is not a number", func(t *testing.T) {
+	t.Run("should fail if the email is empty", func(t *testing.T) {
 		payload := types.RegisterUserPayload{
 			FirstName: "Paranie",
 			LastName:  "Tharan",
-			Email:     "",
 			Password:  "1245P",
 		}
 
@@ -40,6 +39,18 @@ func TestUserServiceHandlers(t *testing.T) {
 
 		if rr.Code != http.StatusBadRequest {
 			t.Errorf("expected status code %d, got %d", http.StatusBadRequest, rr.Code)
+		}
+
+		var response map[string]string
+		if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
+			t.Fatalf("could not parse response: %v", err)
+		}
+		if response["error"] != "email is required" {
+			t.Errorf("expected error message 'email is required', got '%v'", response["error"])
+		}
+
+		if response["error"] == "email is required" {
+			t.Errorf("expected error message 'email is required', got '%v'", response["error"])
 		}
 	})
 }

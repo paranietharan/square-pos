@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"square-pos/pkg/types"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -37,7 +38,13 @@ func Connect() *gorm.DB {
 		log.Fatalf("Could not connect to the database: %v", errOpen)
 	}
 
-	fmt.Println("Successfully connected to PostgreSQL database successfully.........")
+	// Migration
+	err = DB.AutoMigrate(&types.User{}, &types.Product{}, &types.Order{}, &types.OrderItem{})
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+	log.Println("Database migrated successfully!")
+	log.Println("Successfully connected to PostgreSQL database successfully.........")
 	return DB
 }
 

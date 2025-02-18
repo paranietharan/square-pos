@@ -2,11 +2,13 @@ package user
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"square-pos/pkg/service/auth"
 	"square-pos/pkg/types"
 	"square-pos/pkg/utils"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -34,11 +36,17 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if err := utils.Validate.Struct(user); err != nil {
-	// 	errors := err.(validator.ValidationErrors)
-	// 	utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
-	// 	return
-	// }
+	if err := utils.Validate.Struct(user); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
+		return
+	}
+
+	if user.Email == "" {
+		log.Println("Email is empty, returning error")
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("email is required"))
+		return
+	}
 
 	// check if user exists
 	_, err := h.store.GetUserByEmail(user.Email)
