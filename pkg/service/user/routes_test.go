@@ -28,13 +28,12 @@ func TestUserServiceHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		req.Header.Set("Content-Type", "application/json") // Required for JSON body parsing
+		req.Header.Set("Content-Type", "application/json")
 
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
 		router.HandleFunc("/register", handler.handleRegister).Methods(http.MethodPost)
-
 		router.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusBadRequest {
@@ -45,11 +44,8 @@ func TestUserServiceHandlers(t *testing.T) {
 		if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
 			t.Fatalf("could not parse response: %v", err)
 		}
-		if response["error"] != "email is required" {
-			t.Errorf("expected error message 'email is required', got '%v'", response["error"])
-		}
 
-		if response["error"] == "email is required" {
+		if response["error"] != "email is required" {
 			t.Errorf("expected error message 'email is required', got '%v'", response["error"])
 		}
 	})
@@ -65,7 +61,7 @@ func (m *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
 	return &types.User{}, nil
 }
 
-func (m *mockUserStore) CreateUser(u types.User) error {
+func (m *mockUserStore) CreateUser(u *types.User) error {
 	return nil
 }
 

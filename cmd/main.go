@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	log.Printf("Using JWT Secret: %s", config.Envs.JWTSecret)
+
 	// Connect to the database
 	db := config.Connect()
 	if db == nil {

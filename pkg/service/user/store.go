@@ -17,7 +17,7 @@ func NewStore(db *gorm.DB) *Store {
 }
 
 // CreateUser inserts a new user into the database
-func (s *Store) CreateUser(user types.User) error {
+func (s *Store) CreateUser(user *types.User) error {
 	result := s.db.Create(user)
 	if result.Error != nil {
 		return result.Error

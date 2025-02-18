@@ -9,6 +9,7 @@ import (
 	"square-pos/pkg/types"
 	"square-pos/pkg/utils"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -21,6 +22,12 @@ const UserKey contextKey = "userID"
 func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := utils.GetTokenFromRequest(r)
+		log.Printf("Extracted token: %s", tokenString) //print extracted token
+
+		// Strip the "Bearer " prefix if it is  present there
+		if strings.HasPrefix(tokenString, "Bearer ") {
+			tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+		}
 
 		token, err := validateJWT(tokenString)
 		if err != nil {
@@ -66,7 +73,7 @@ func CreateJWT(secret []byte, userID int) (string, error) {
 	expiration := time.Second * time.Duration(config.Envs.JWTExpirationInSeconds)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID":    strconv.Itoa(int(userID)),
+		"userID":    strconv.Itoa(userID),
 		"expiresAt": time.Now().Add(expiration).Unix(),
 	})
 
@@ -75,6 +82,7 @@ func CreateJWT(secret []byte, userID int) (string, error) {
 		return "", err
 	}
 
+	log.Printf("Created token: %s", tokenString)
 	return tokenString, err
 }
 

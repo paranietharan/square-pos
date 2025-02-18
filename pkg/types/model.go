@@ -8,7 +8,7 @@ type User struct {
 	LastName  string    `json:"lastName"`
 	Email     string    `json:"email" gorm:"unique"`
 	Password  string    `json:"-"` // Password is not exposed in API responses
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 	Orders    []Order   `json:"orders"` // One-to-many relationship with orders
 }
 
