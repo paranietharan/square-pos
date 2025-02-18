@@ -1,7 +1,9 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
+	"square-pos/pkg/service/auth"
 	"square-pos/pkg/types"
 	"square-pos/pkg/utils"
 
@@ -26,12 +28,43 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
-	var payload types.LoginUserPayload
-
-	if err := utils.ParseJSON(r, payload); err != nil {
+	var user types.RegisterUserPayload
+	if err := utils.ParseJSON(r, &user); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	// check if the user exists
+	// if err := utils.Validate.Struct(user); err != nil {
+	// 	errors := err.(validator.ValidationErrors)
+	// 	utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
+	// 	return
+	// }
+
+	// check if user exists
+	_, err := h.store.GetUserByEmail(user.Email)
+	if err == nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", user.Email))
+		return
+	}
+
+	// hash password
+	hashedPassword, err := auth.HashPassword(user.Password)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = h.store.CreateUser(types.User{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Password:  hashedPassword,
+	})
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusCreated, nil)
 }
