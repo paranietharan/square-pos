@@ -1,26 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"square-pos/pkg/config"
 	"square-pos/pkg/router"
 )
 
 func main() {
+	// Connect to the database
 	db := config.Connect()
-	defer config.Disconnect()
+	if db == nil {
+		log.Fatal("Failed to connect to the database")
+	}
 
-	// err := db.AutoMigrate(&models.User{}, &models.Ride{}, &models.UserRides{})
-	// if err != nil {
-	// 	log.Fatalf("Error migrating schema: %v", err)
-	// }
-	// log.Println("Database tables migrated successfully!")
+	// Start the server
+	router.StartServer(db)
+	log.Println("Server is running on port 8080...")
 
-	r := router.InitializeRoutes(db)
-
-	port := ":8080"
-	fmt.Println("Server started on port", port)
-	log.Fatal(http.ListenAndServe(port, r))
+	// Keep the server running
+	select {}
 }
