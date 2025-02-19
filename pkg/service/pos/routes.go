@@ -35,7 +35,7 @@ func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 		return
 	}
-	res := h.store.CreateOrder(createOrderReq)
+	res := h.posStore.CreateOrder(createOrderReq)
 	utils.WriteJSON(w, http.StatusCreated, res)
 }
 
