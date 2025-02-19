@@ -17,3 +17,7 @@ type UserStore interface {
 	GetUserByID(id int) (*User, error)
 	CreateUser(*User) error
 }
+
+type PosStore interface {
+	CreateOrder()
+}
