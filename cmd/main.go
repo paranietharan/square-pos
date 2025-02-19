@@ -20,5 +20,6 @@ func main() {
 	log.Println("Server is running on port 8080...")
 
 	// Keep the server running
+	// TODO: Why do you need this to run the server
 	select {}
 }

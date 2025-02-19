@@ -1,5 +1,6 @@
 package router
 
+/* TODO: Explain why I use dependency injection here*/
 import (
 	"log"
 	"net/http"

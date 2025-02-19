@@ -25,7 +25,12 @@ func (h *PosHandler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
-	res := h.store.CreateOrder()
+	var createOrderReq dto.CreateOrderRequest
+	if err := json.NewDecoder(r.Body).Decode(&createOrderReq); err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+		return
+	}
+	res := h.store.CreateOrder(createOrderReq)
 	utils.WriteJSON(w, http.StatusCreated, res)
 }
 

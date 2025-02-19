@@ -15,6 +15,7 @@ import (
 var DB *gorm.DB
 
 // Connection
+// TODO: Seperate DB functionality into diff package
 func Connect() *gorm.DB {
 	err := godotenv.Load(".env")
 	if err != nil {

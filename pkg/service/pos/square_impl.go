@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"square-pos/pkg/config"
 	"square-pos/pkg/dto"
+	"strconv"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -23,18 +24,23 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder() dto.CreateOrderRes {
+func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest) dto.CreateOrderRes {
+	productName := request.ProductName
+	qunatity := request.Quantity
+	amount := request.Amount
+
 	idempotencyKey := uuid.New().String()
+	qty := strconv.Itoa(qunatity)
 	orderReq := dto.OrderRequest{
 		IdempotencyKey: idempotencyKey,
 		Order: dto.Order{
 			LocationID: config.GetEnv("LOCATION_ID", ""),
 			LineItems: []dto.LineItem{
 				{
-					Name:     "Book29082001",
-					Quantity: "1000",
+					Name:     productName,
+					Quantity: qty,
 					BasePriceMoney: dto.Money{
-						Amount:   10,
+						Amount:   amount,
 						Currency: "USD",
 					},
 				},
@@ -71,7 +77,7 @@ func (ps *PosStore) CreateOrder() dto.CreateOrderRes {
 	}
 
 	// Print the parsed response
-	fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
+	// fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
 	return orderResponse
 }
 

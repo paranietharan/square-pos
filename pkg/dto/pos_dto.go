@@ -1,8 +1,8 @@
 package dto
 
 type Money struct {
-	Amount   int64  `json:"amount"`
-	Currency string `json:"currency"`
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
 }
 
 type LineItem struct {
@@ -99,4 +99,11 @@ type PaymentResponse struct {
 		ReceiptNumber string      `json:"receipt_number"`
 		ReceiptURL    string      `json:"receipt_url"`
 	} `json:"payment"`
+}
+
+// dto for create order
+type CreateOrderRequest struct {
+	ProductName string  `json:"product_name"`
+	Quantity    int     `json:"quantity"`
+	Amount      float64 `json:"amount"`
 }
