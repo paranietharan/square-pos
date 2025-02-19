@@ -106,6 +106,38 @@ func (ps *PosStore) GetOrder(orderID string) (*dto.CreateOrderRes, error) {
 	return &orderResponse, nil
 }
 
-func (ps *PosStore) SubmitPayments() {
-	//
+func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error) {
+	url := "https://connect.squareupsandbox.com/v2/payments"
+
+	jsonData, err := json.Marshal(paymentReq)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling payment request: %v", err)
+	}
+
+	req, err := http.NewRequestWithContext(context.TODO(), "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+config.GetEnv("ACCESS_TOKEN", ""))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Square-Version", "2025-01-23")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var paymentResponse dto.PaymentResponse
+	if err := json.NewDecoder(resp.Body).Decode(&paymentResponse); err != nil {
+		return nil, fmt.Errorf("error decoding response: %v", err)
+	}
+
+	return &paymentResponse, nil
 }

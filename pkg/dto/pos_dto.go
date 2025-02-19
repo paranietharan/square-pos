@@ -68,3 +68,35 @@ type CreateOrderResponse struct {
 type CreateOrderRes struct {
 	OrderRes CreateOrderResponse `json:"order"`
 }
+
+// dtos for payment
+type PaymentRequest struct {
+	IdempotencyKey    string      `json:"idempotency_key"`
+	AmountMoney       Money       `json:"amount_money"`
+	SourceID          string      `json:"source_id"`
+	OrderID           string      `json:"order_id"`
+	AcceptPartialAuth bool        `json:"accept_partial_authorization"`
+	LocationID        string      `json:"location_id"`
+	ReferenceID       string      `json:"reference_id"`
+	CashDetails       CashDetails `json:"cash_details"`
+}
+
+type CashDetails struct {
+	BuyerSuppliedMoney Money `json:"buyer_supplied_money"`
+}
+
+type PaymentResponse struct {
+	Payment struct {
+		ID            string      `json:"id"`
+		AmountMoney   Money       `json:"amount_money"`
+		Status        string      `json:"status"`
+		SourceType    string      `json:"source_type"`
+		LocationID    string      `json:"location_id"`
+		OrderID       string      `json:"order_id"`
+		ReferenceID   string      `json:"reference_id"`
+		TotalMoney    Money       `json:"total_money"`
+		CashDetails   CashDetails `json:"cash_details"`
+		ReceiptNumber string      `json:"receipt_number"`
+		ReceiptURL    string      `json:"receipt_url"`
+	} `json:"payment"`
+}
