@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"square-pos/pkg/config"
+	"square-pos/pkg/dto"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -21,17 +23,17 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder() CreateOrderResponse {
+func (ps *PosStore) CreateOrder() dto.CreateOrderRes {
 	idempotencyKey := uuid.New().String()
-	orderReq := OrderRequest{
+	orderReq := dto.OrderRequest{
 		IdempotencyKey: idempotencyKey,
-		Order: Order{
+		Order: dto.Order{
 			LocationID: config.GetEnv("LOCATION_ID", ""),
-			LineItems: []LineItem{
+			LineItems: []dto.LineItem{
 				{
-					Name:     "Book-01",
-					Quantity: "100",
-					BasePriceMoney: Money{
+					Name:     "Book29082001",
+					Quantity: "1000",
+					BasePriceMoney: dto.Money{
 						Amount:   10,
 						Currency: "USD",
 					},
@@ -63,12 +65,12 @@ func (ps *PosStore) CreateOrder() CreateOrderResponse {
 	}
 	defer resp.Body.Close()
 
-	var orderResponse CreateOrderResponse
+	var orderResponse dto.CreateOrderRes
 	if err := json.NewDecoder(resp.Body).Decode(&orderResponse); err != nil {
 		log.Fatalf("Error decoding response: %v", err)
 	}
 
 	// Print the parsed response
-	//fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
+	fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
 	return orderResponse
 }

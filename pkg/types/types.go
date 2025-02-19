@@ -1,5 +1,7 @@
 package types
 
+import "square-pos/pkg/dto"
+
 type RegisterUserPayload struct {
 	FirstName string `json:"firstName" validate:"required"`
 	LastName  string `json:"lastName" validate:"required"`
@@ -19,5 +21,5 @@ type UserStore interface {
 }
 
 type PosStore interface {
-	CreateOrder()
+	CreateOrder() dto.CreateOrderRes
 }

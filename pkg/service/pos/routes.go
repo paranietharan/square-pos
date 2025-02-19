@@ -21,6 +21,6 @@ func (h *PosHandler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
-	h.store.CreateOrder()
-	utils.WriteJSON(w, http.StatusCreated, nil)
+	res := h.store.CreateOrder()
+	utils.WriteJSON(w, http.StatusCreated, res)
 }
