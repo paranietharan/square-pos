@@ -54,8 +54,7 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	secret := []byte(config.Envs.JWTSecret)
 	token, err := auth.CreateJWT(secret, u.ID)
-	// TODO: Remove log just fore tesr
-	log.Printf("User id in creating jwt : %d\n", u.ID)
+	//log.Printf("User id in creating jwt : %d\n", u.ID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return

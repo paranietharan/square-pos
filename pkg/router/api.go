@@ -1,6 +1,13 @@
 package router
 
-/* TODO: Explain why I use dependency injection here*/
+/*
+* Dependency injection helpes to maintain a single database connections
+* so router or services no need to create the database connections. when we need to scale the application
+* no need to create many datbase connections
+
+* helps to maintain modularity of the code
+
+ */
 import (
 	"log"
 	"net/http"

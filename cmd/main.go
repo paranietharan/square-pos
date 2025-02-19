@@ -20,6 +20,8 @@ func main() {
 	log.Println("Server is running on port 8080...")
 
 	// Keep the server running
-	// TODO: Why do you need this to run the server
+	// The select key word is used to run the go rountines indefinately
+	// It helps to keep the server up and running other wise it crash the server
+	// refer the screen shot in the Screenshot_01
 	select {}
 }
