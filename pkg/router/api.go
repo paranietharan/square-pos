@@ -31,7 +31,7 @@ func InitializeRoutes(db *gorm.DB) *mux.Router {
 
 	/// register routes for pos operations
 	posStore := pos.NewPosStore(db)
-	posHandler := pos.NewPosHandler(posStore)
+	posHandler := pos.NewPosHandler(posStore, userStore)
 
 	posHandler.RegisterRoutes(subRouter)
 	log.Println("Server started............")

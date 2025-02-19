@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"square-pos/pkg/dto"
+	"square-pos/pkg/service/auth"
 	"square-pos/pkg/types"
 	"square-pos/pkg/utils"
 
@@ -11,17 +12,21 @@ import (
 )
 
 type PosHandler struct {
-	store types.PosStore
+	posStore  types.PosStore
+	userStore types.UserStore
 }
 
-func NewPosHandler(store types.PosStore) *PosHandler {
-	return &PosHandler{store: store}
+func NewPosHandler(posStore types.PosStore, userStore types.UserStore) *PosHandler {
+	return &PosHandler{
+		posStore:  posStore,
+		userStore: userStore,
+	}
 }
 
 func (h *PosHandler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/create-order", h.handleCreateOrder).Methods("POST")
-	router.HandleFunc("/order/{id}", h.handleGetOrder).Methods("GET")
-	router.HandleFunc("/submit-payment", h.handleSubmitPayment).Methods("POST")
+	router.HandleFunc("/create-order", auth.WithJWTAuth(h.handleCreateOrder, h.userStore)).Methods("POST")
+	router.HandleFunc("/order/{id}", auth.WithJWTAuth(h.handleGetOrder, h.userStore)).Methods("GET")
+	router.HandleFunc("/submit-payment", auth.WithJWTAuth(h.handleSubmitPayment, h.userStore)).Methods("POST")
 }
 
 func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +43,7 @@ func (h *PosHandler) handleGetOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID := vars["id"]
 
-	res, _ := h.store.GetOrder(orderID)
+	res, _ := h.posStore.GetOrder(orderID)
 
 	if res == nil {
 		utils.WriteJSON(w, http.StatusNotFound, map[string]string{
@@ -57,7 +62,7 @@ func (h *PosHandler) handleSubmitPayment(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	paymentResp, err := h.store.SubmitPayments(paymentReq)
+	paymentResp, err := h.posStore.SubmitPayments(paymentReq)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
