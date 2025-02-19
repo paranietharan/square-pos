@@ -3,6 +3,7 @@ package router
 import (
 	"log"
 	"net/http"
+	"square-pos/pkg/service/pos"
 	"square-pos/pkg/service/user"
 
 	"github.com/gorilla/mux"
@@ -14,10 +15,17 @@ func InitializeRoutes(db *gorm.DB) *mux.Router {
 
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 
+	// Register routes for authentiaction & authorizations
 	userStore := user.NewStore(db)
 	userHandler := user.NewHandler(userStore)
 
 	userHandler.RegisterRoutes(subRouter)
+
+	/// register routes for pos operations
+	posStore := pos.NewPosStore(db)
+	posHandler := pos.NewPosHandler(posStore)
+
+	posHandler.RegisterRoutes(subRouter)
 	log.Println("Server started............")
 	return router
 }

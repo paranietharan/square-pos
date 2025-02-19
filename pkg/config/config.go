@@ -39,6 +39,7 @@ func Connect() *gorm.DB {
 	}
 
 	// Migration
+	log.Println("Migration started.............")
 	err = DB.AutoMigrate(&types.User{}, &types.Product{}, &types.Order{}, &types.OrderItem{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
@@ -81,19 +82,19 @@ func initConfig() Config {
 	godotenv.Load()
 
 	return Config{
-		PublicHost:             getEnv("PUBLIC_HOST", "http://localhost"),
-		Port:                   getEnv("PORT", "8080"),
-		DBUser:                 getEnv("DB_USER", "root"),
-		DBPassword:             getEnv("DB_PASSWORD", "mypassword"),
-		DBAddress:              fmt.Sprintf("%s:%s", getEnv("DB_HOST", "127.0.0.1"), getEnv("DB_PORT", "3306")),
-		DBName:                 getEnv("DB_NAME", "ecom"),
-		JWTSecret:              getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
+		PublicHost:             GetEnv("PUBLIC_HOST", "http://localhost"),
+		Port:                   GetEnv("PORT", "8080"),
+		DBUser:                 GetEnv("DB_USER", "root"),
+		DBPassword:             GetEnv("DB_PASSWORD", "mypassword"),
+		DBAddress:              fmt.Sprintf("%s:%s", GetEnv("DB_HOST", "127.0.0.1"), GetEnv("DB_PORT", "3306")),
+		DBName:                 GetEnv("DB_NAME", "ecom"),
+		JWTSecret:              GetEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
 		JWTExpirationInSeconds: getEnvAsInt("JWT_EXPIRATION_IN_SECONDS", 3600*24*7),
 	}
 }
 
 // Gets the env by key or fallbacks
-func getEnv(key, fallback string) string {
+func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
