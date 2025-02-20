@@ -78,6 +78,11 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest) dto.CreateOrderR
 
 	// Print the parsed response
 	// fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
+
+	// get the user ID
+
+	// Store the order in the db
+	//CreateOrder()
 	return orderResponse
 }
 
