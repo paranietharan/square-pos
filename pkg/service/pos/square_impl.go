@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"square-pos/pkg/config"
 	"square-pos/pkg/dto"
+	"square-pos/pkg/types"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -24,7 +25,7 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest) dto.CreateOrderRes {
+func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dto.CreateOrderRes {
 	productName := request.ProductName
 	qunatity := request.Quantity
 	amount := request.Amount
@@ -78,6 +79,9 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest) dto.CreateOrderR
 
 	// Print the parsed response
 	// fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
+
+	// create order
+	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, ps.db)
 	return orderResponse
 }
 
@@ -145,5 +149,7 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 		return nil, fmt.Errorf("error decoding response: %v", err)
 	}
 
+	// Update submit paymets in the db
+	UpdatePaymentsInDB(paymentReq.OrderID, paymentReq.LocationID, ps.db)
 	return &paymentResponse, nil
 }

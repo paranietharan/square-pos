@@ -2,6 +2,7 @@ package pos
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"square-pos/pkg/dto"
 	"square-pos/pkg/service/auth"
@@ -30,12 +31,27 @@ func (h *PosHandler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
+
+	// get user info ---------------------------
+	userID := auth.GetUserIDFromContext(r.Context())
+	if userID == -1 {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid or missing user ID"))
+		return
+	}
+
+	user, err := h.userStore.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to fetch user: %v", err))
+		return
+	}
+	// ----------------------------------
+
 	var createOrderReq dto.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&createOrderReq); err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 		return
 	}
-	res := h.posStore.CreateOrder(createOrderReq)
+	res := h.posStore.CreateOrder(createOrderReq, *user)
 	utils.WriteJSON(w, http.StatusCreated, res)
 }
 

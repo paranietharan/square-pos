@@ -38,7 +38,7 @@ func Connect() *gorm.DB {
 
 	// Migration
 	log.Println("Migration started.............")
-	err = DB.AutoMigrate(&types.User{}, &types.Product{}, &types.Order{}, &types.OrderItem{})
+	err = DB.AutoMigrate(&types.User{}, &types.Order{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
