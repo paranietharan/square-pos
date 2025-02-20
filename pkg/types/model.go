@@ -23,6 +23,7 @@ type Order struct {
 	Quantity    int       `json:"quantity"`
 	UnitPrice   float64   `json:"unitPrice"`
 	IsPaid      bool      `json:"is_paid"`
+	TableID     string    `json:"table_id"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }

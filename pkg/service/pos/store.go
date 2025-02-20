@@ -9,7 +9,7 @@ import (
 )
 
 // function to store order in the db
-func CreateOrder(user types.User, LocationID string, orderID string, productName string, qty int, up float64, db *gorm.DB) error {
+func CreateOrder(user types.User, LocationID string, orderID string, productName string, qty int, up float64, tableID string, db *gorm.DB) error {
 	log.Printf("User that create order : %v", user)
 
 	order := types.Order{
@@ -20,6 +20,7 @@ func CreateOrder(user types.User, LocationID string, orderID string, productName
 		ProductName: productName,
 		Quantity:    qty,
 		UnitPrice:   up,
+		TableID:     tableID,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -50,4 +51,17 @@ func UpdatePaymentsInDB(OrderId string, LocationID string, db *gorm.DB) error {
 
 	log.Printf("Updated payment status for OrderID = %s at LocationID = %s", OrderId, LocationID)
 	return nil
+}
+
+func GetOrdersByTableID(tableID string, db *gorm.DB) ([]types.Order, error) {
+	var orders []types.Order
+
+	result := db.Where("table_id = ?", tableID).Find(&orders)
+	if result.Error != nil {
+		log.Printf("Error retrieving orders for table %s: %v", tableID, result.Error)
+		return nil, result.Error
+	}
+
+	log.Printf("Retrieved orders for table %s: %v", tableID, orders)
+	return orders, nil
 }

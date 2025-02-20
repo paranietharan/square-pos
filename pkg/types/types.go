@@ -26,4 +26,5 @@ type PosStore interface {
 	CreateOrder(dto.CreateOrderRequest, User) dto.CreateOrderResp
 	GetOrder(orderID string) (*dto.CreateOrderRes, error)
 	SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error)
+	GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error)
 }

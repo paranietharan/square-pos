@@ -17,8 +17,9 @@ type LineItem struct {
 }
 
 type Order struct {
-	LocationID string     `json:"location_id"`
-	LineItems  []LineItem `json:"line_items"`
+	LocationID  string     `json:"location_id"`
+	LineItems   []LineItem `json:"line_items"`
+	ReferenceID string     `json:"reference_id"`
 }
 
 type OrderRequest struct {
@@ -111,6 +112,7 @@ type CreateOrderRequest struct {
 	ProductName string  `json:"product_name"`
 	Quantity    int     `json:"quantity"`
 	Amount      float64 `json:"amount"`
+	TableID     string  `json:"table_id"`
 }
 
 // Dto for sending to the user - Order Response

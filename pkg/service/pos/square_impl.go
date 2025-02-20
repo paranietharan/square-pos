@@ -29,6 +29,7 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 	productName := request.ProductName
 	qunatity := request.Quantity
 	amount := request.Amount
+	tableID := request.TableID
 
 	idempotencyKey := uuid.New().String()
 	qty := strconv.Itoa(qunatity)
@@ -46,6 +47,7 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 					},
 				},
 			},
+			ReferenceID: tableID,
 		},
 	}
 
@@ -81,7 +83,7 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 	// fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
 
 	// create order
-	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, ps.db)
+	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, tableID, ps.db)
 	//return orderResponse
 	return dto.ParseCreateOrderResponse(orderResponse.OrderRes)
 }
@@ -153,4 +155,23 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 	// Update submit paymets in the db
 	UpdatePaymentsInDB(paymentReq.OrderID, paymentReq.LocationID, ps.db)
 	return &paymentResponse, nil
+}
+
+func (ps *PosStore) GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error) {
+	order, err := GetOrdersByTableID(tableID, ps.db)
+
+	var res []*dto.CreateOrderRes
+
+	for _, v := range order {
+		a, err := ps.GetOrder(v.OrderID)
+
+		if err != nil {
+			log.Println(err)
+			return res, err
+		}
+
+		res = append(res, a)
+	}
+
+	return res, err
 }
