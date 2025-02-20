@@ -1,5 +1,10 @@
 package dto
 
+import (
+	"strconv"
+	"time"
+)
+
 type Money struct {
 	Amount   float64 `json:"amount"`
 	Currency string  `json:"currency"`
@@ -65,7 +70,7 @@ type CreateOrderResponse struct {
 	NetAmountDueMoney       Money         `json:"net_amount_due_money"`
 }
 
-type CreateOrderRes struct {
+type CreateOrderRes struct { // used to receive the request from the pos
 	OrderRes CreateOrderResponse `json:"order"`
 }
 
@@ -106,4 +111,131 @@ type CreateOrderRequest struct {
 	ProductName string  `json:"product_name"`
 	Quantity    int     `json:"quantity"`
 	Amount      float64 `json:"amount"`
+}
+
+// Dto for sending to the user - Order Response
+type CreateOrderResp struct {
+	ID       string      `json:"order_id"`
+	OpenedAt time.Time   `json:"opened_at"`
+	IsClosed bool        `json:"is_closed"`
+	Table    string      `json:"table"`
+	Items    []OrderItem `json:"items"`
+	Totals   OrderTotals `json:"totals"`
+}
+
+type OrderItem struct {
+	Name      string          `json:"name"`
+	Comment   string          `json:"comment"`
+	UnitPrice float64         `json:"unit_price"`
+	Quantity  int             `json:"quantity"`
+	Discounts []OrderDiscount `json:"discounts"`
+	Modifiers []OrderModifier `json:"modifiers"`
+	Amount    float64         `json:"amount"`
+}
+
+type OrderDiscount struct {
+	Name         string  `json:"name"`
+	IsPercentage bool    `json:"is_percentage"`
+	Value        float64 `json:"value"`
+	Amount       float64 `json:"amount"`
+}
+
+type OrderModifier struct {
+	Name      string  `json:"name"`
+	UnitPrice float64 `json:"unit_price"`
+	Quantity  int     `json:"quantity"`
+	Amount    float64 `json:"amount"`
+}
+
+type OrderTotals struct {
+	Discounts     float64 `json:"discounts"`
+	Due           float64 `json:"due"`
+	Tax           float64 `json:"tax"`
+	ServiceCharge float64 `json:"service_charge"`
+	Paid          float64 `json:"paid"`
+	Tips          float64 `json:"tips"`
+	Total         float64 `json:"total"`
+}
+
+func ParseCreateOrderResponse(response CreateOrderResponse) CreateOrderResp {
+	orderResp := CreateOrderResp{
+		ID:       response.Id,
+		OpenedAt: parseTime(response.CreatedAt),
+		IsClosed: response.State == "CLOSED", // Default set the value as order cloased
+		Table:    "29",                       // fixed table
+		Items:    parseItems(response.LineItems),
+		Totals:   parseTotals(response.NetAmounts),
+	}
+
+	return orderResp
+}
+
+func parseTime(timeStr string) time.Time {
+	parsedTime, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return time.Time{}
+	}
+	return parsedTime
+}
+
+func parseItems(lineItems []LineItemRes) []OrderItem {
+	var items []OrderItem
+	for _, item := range lineItems {
+		discounts := parseDiscounts(item.TotalDiscountMoney)
+		modifiers := parseModifiers(item.TotalServiceChargeMoney)
+
+		orderItem := OrderItem{
+			Name:      item.Name,
+			Comment:   "",
+			UnitPrice: item.BasePriceMoney.Amount,
+			Quantity:  parseQuantity(item.Quantity),
+			Discounts: discounts,
+			Modifiers: modifiers,
+			Amount:    item.TotalMoney.Amount,
+		}
+		items = append(items, orderItem)
+	}
+	return items
+}
+
+func parseDiscounts(discountMoney Money) []OrderDiscount {
+	return []OrderDiscount{
+		{
+			Name:         "",
+			IsPercentage: true,
+			Value:        discountMoney.Amount,
+			Amount:       discountMoney.Amount,
+		},
+	}
+}
+
+func parseModifiers(serviceChargeMoney Money) []OrderModifier {
+	return []OrderModifier{
+		{
+			Name:      "",
+			UnitPrice: serviceChargeMoney.Amount,
+			Quantity:  1,
+			Amount:    serviceChargeMoney.Amount,
+		},
+	}
+}
+
+func parseQuantity(quantityStr string) int {
+	quantity, err := strconv.Atoi(quantityStr)
+	if err != nil {
+		return 0
+	}
+	return quantity
+}
+
+func parseTotals(netAmounts NetAmounts) OrderTotals {
+	return OrderTotals{
+		Discounts:     netAmounts.DiscountMoney.Amount,
+		Due:           netAmounts.TotalMoney.Amount,
+		Tax:           netAmounts.TaxMoney.Amount,
+		ServiceCharge: netAmounts.ServiceChargeMoney.Amount,
+		Paid:          netAmounts.TotalMoney.Amount,
+		Tips:          netAmounts.TipMoney.Amount,
+		Total:         netAmounts.TotalMoney.Amount,
+	}
 }

@@ -2,13 +2,12 @@ package main
 
 import (
 	"log"
-	"square-pos/pkg/config"
 	"square-pos/pkg/database"
 	"square-pos/pkg/router"
 )
 
 func main() {
-	log.Printf("Using JWT Secret: %s", config.Envs.JWTSecret)
+	//log.Printf("Using JWT Secret: %s", config.Envs.JWTSecret)
 
 	// Connect to the database
 	db := database.Connect()

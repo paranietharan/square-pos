@@ -25,7 +25,7 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dto.CreateOrderRes {
+func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dto.CreateOrderResp {
 	productName := request.ProductName
 	qunatity := request.Quantity
 	amount := request.Amount
@@ -82,7 +82,8 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 
 	// create order
 	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, ps.db)
-	return orderResponse
+	//return orderResponse
+	return dto.ParseCreateOrderResponse(orderResponse.OrderRes)
 }
 
 func (ps *PosStore) GetOrder(orderID string) (*dto.CreateOrderRes, error) {
