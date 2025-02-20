@@ -19,11 +19,11 @@ type LoginUserPayload struct {
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
-	CreateUser(*User) error
+	CreateUser(*User) (dto.UserCreateResponse, error)
 }
 
 type PosStore interface {
-	CreateOrder(dto.CreateOrderRequest, User) dto.CreateOrderRes
+	CreateOrder(dto.CreateOrderRequest, User) dto.CreateOrderResp
 	GetOrder(orderID string) (*dto.CreateOrderRes, error)
 	SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error)
 }

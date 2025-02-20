@@ -96,7 +96,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.store.CreateUser(&types.User{
+	resp, err := h.store.CreateUser(&types.User{
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -108,7 +108,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, nil)
+	utils.WriteJSON(w, http.StatusCreated, resp)
 }
 
 func (h *Handler) AdminHello(w http.ResponseWriter, r *http.Request) {

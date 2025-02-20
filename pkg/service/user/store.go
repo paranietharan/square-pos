@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"square-pos/pkg/dto"
 	"square-pos/pkg/types"
 
 	"gorm.io/gorm"
@@ -17,12 +18,12 @@ func NewStore(db *gorm.DB) *Store {
 }
 
 // CreateUser inserts a new user into the database
-func (s *Store) CreateUser(user *types.User) error {
+func (s *Store) CreateUser(user *types.User) (dto.UserCreateResponse, error) {
 	result := s.db.Create(user)
 	if result.Error != nil {
-		return result.Error
+		return dto.UserCreateResponse{}, result.Error
 	}
-	return nil
+	return dto.UserCreateResponse{Message: "UserCreated successfully"}, nil
 }
 
 // GetUserByEmail retrieves a user by their email address
