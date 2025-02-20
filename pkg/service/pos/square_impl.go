@@ -149,5 +149,7 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 		return nil, fmt.Errorf("error decoding response: %v", err)
 	}
 
+	// Update submit paymets in the db
+	UpdatePaymentsInDB(paymentReq.OrderID, paymentReq.LocationID, ps.db)
 	return &paymentResponse, nil
 }

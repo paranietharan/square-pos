@@ -34,3 +34,20 @@ func CreateOrder(user types.User, LocationID string, orderID string, productName
 	log.Printf("Created order : %v", order)
 	return nil
 }
+
+func UpdatePaymentsInDB(OrderId string, LocationID string, db *gorm.DB) error {
+	result := db.Exec("UPDATE orders SET is_paid = ?, updated_at = ? WHERE order_id = ? AND location_id = ?", true, time.Now(), OrderId, LocationID)
+
+	if result.Error != nil {
+		log.Printf("Error updating payment status: %v", result.Error)
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		log.Printf("Order not found: LocationID = %s, OrderID = %s", LocationID, OrderId)
+		return nil
+	}
+
+	log.Printf("Updated payment status for OrderID = %s at LocationID = %s", OrderId, LocationID)
+	return nil
+}
