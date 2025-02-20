@@ -13,14 +13,18 @@ type User struct {
 }
 
 type Order struct {
-	ID        int       `json:"id" gorm:"primaryKey"`
-	UserID    int       `json:"userId"`
-	User      User      `json:"user"`
-	Total     float64   `json:"total"`
-	Quantity  int       `json:"quantity"`
-	UnitPrice float64   `json:"unitPrice"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID          int       `json:"id" gorm:"primaryKey"`
+	UserID      int       `json:"userId"`
+	User        User      `json:"user"`
+	LocationID  string    `json:"location_id"`
+	OrderID     string    `json:"order_id"`
+	ProductName string    `json:"product_name"`
+	Total       float64   `json:"total"`
+	Quantity    int       `json:"quantity"`
+	UnitPrice   float64   `json:"unitPrice"`
+	IsPaid      bool      `json:"is_paid"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 func (o *Order) CalculateTotal() {

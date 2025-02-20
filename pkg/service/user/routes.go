@@ -111,7 +111,19 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusCreated, nil)
 }
 
-// function to test the authentication
 func (h *Handler) AdminHello(w http.ResponseWriter, r *http.Request) {
-	utils.WriteJSON(w, http.StatusCreated, "Hi, You are logged in successfully.............")
+	userID := auth.GetUserIDFromContext(r.Context())
+	if userID == -1 {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid or missing user ID"))
+		return
+	}
+
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to fetch user: %v", err))
+		return
+	}
+
+	response := fmt.Sprintf("Hi, %s %s. You are logged in successfully.", user.FirstName, user.LastName)
+	utils.WriteJSON(w, http.StatusOK, response)
 }
