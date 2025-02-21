@@ -59,6 +59,7 @@ type CreateOrderResponse struct {
 	LineItems               []LineItemRes `json:"line_items"`
 	CreatedAt               string        `json:"created_at"`
 	UpdatedAt               string        `json:"updated_at"`
+	ReferenceID             string        `json:"reference_id"`
 	State                   string        `json:"state"`
 	Version                 int           `json:"version"`
 	TotalTaxMoney           Money         `json:"total_tax_money"`
@@ -159,12 +160,12 @@ type OrderTotals struct {
 	Total         float64 `json:"total"`
 }
 
-func ParseCreateOrderResponse(response CreateOrderResponse) CreateOrderResp {
+func ParseCreateOrderResponse(response CreateOrderResponse, tableID string) CreateOrderResp {
 	orderResp := CreateOrderResp{
 		ID:       response.Id,
 		OpenedAt: parseTime(response.CreatedAt),
 		IsClosed: response.State == "CLOSED", // Default set the value as order cloased
-		Table:    "29",                       // fixed table
+		Table:    tableID,                    // fixed table
 		Items:    parseItems(response.LineItems),
 		Totals:   parseTotals(response.NetAmounts),
 	}

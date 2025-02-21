@@ -85,7 +85,7 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 	// create order
 	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, tableID, ps.db)
 	//return orderResponse
-	return dto.ParseCreateOrderResponse(orderResponse.OrderRes)
+	return dto.ParseCreateOrderResponse(orderResponse.OrderRes, request.TableID)
 }
 
 func (ps *PosStore) GetOrder(orderID string) (*dto.CreateOrderRes, error) {
@@ -151,7 +151,6 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 	if err := json.NewDecoder(resp.Body).Decode(&paymentResponse); err != nil {
 		return nil, fmt.Errorf("error decoding response: %v", err)
 	}
-
 	// Update submit paymets in the db
 	UpdatePaymentsInDB(paymentReq.OrderID, paymentReq.LocationID, ps.db)
 	return &paymentResponse, nil
