@@ -25,37 +25,14 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.CreateOrderResp {
-	// productName := request.ProductName
-	// qunatity := request.Quantity
-	// amount := request.Amount
-	// tableID := request.TableID
-
-	// idempotencyKey := uuid.New().String()
-	// qty := strconv.Itoa(qunatity)
-	// orderReq := dto.OrderRequest{
-	// 	IdempotencyKey: idempotencyKey,
-	// 	Order: dto.Order{
-	// 		LocationID: config.GetEnv("LOCATION_ID", ""),
-	// 		LineItems: []dto.LineItem{
-	// 			{
-	// 				Name:     productName,
-	// 				Quantity: qty,
-	// 				BasePriceMoney: dto.Money{
-	// 					Amount:   amount,
-	// 					Currency: "USD",
-	// 				},
-	// 			},
-	// 		},
-	// 		ReferenceID: tableID,
-	// 	},
-	// }
+func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) error {
 
 	orderReq := parser.ParseOrderInputToOrderRequest(request)
 
 	jsonData, err := json.Marshal(orderReq)
 	if err != nil {
 		log.Fatalf("Error marshalling JSON: %v", err)
+		return err
 	}
 
 	req, err := http.NewRequestWithContext(context.TODO(), "POST",
@@ -64,6 +41,7 @@ func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.Creat
 
 	if err != nil {
 		log.Fatalf("Error creating request: %v", err)
+		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+config.GetEnv("ACCESS_TOKEN", ""))
 	req.Header.Set("Content-Type", "application/json")
@@ -73,12 +51,14 @@ func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.Creat
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatalf("Error making request: %v", err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	var orderResponse dto.CreateOrderRes
 	if err := json.NewDecoder(resp.Body).Decode(&orderResponse); err != nil {
 		log.Fatalf("Error decoding response: %v", err)
+		return err
 	}
 
 	// Print the parsed response
@@ -87,7 +67,7 @@ func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.Creat
 	// create order
 	//CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, tableID, ps.db)
 	//return orderResponse
-	return dto.ParseCreateOrderResponse(orderResponse.OrderRes, request.TableID)
+	return nil
 }
 
 func (ps *PosStore) GetOrder(orderID string) (order qlub.Order, err error) {
