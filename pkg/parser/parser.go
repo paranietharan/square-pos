@@ -3,6 +3,7 @@ package parser
 import (
 	"log"
 	"square-pos/pkg/dto"
+	"strconv"
 
 	"github.com/clubpay-pos-worker/sdk-go/v2/qlub"
 )
@@ -34,4 +35,40 @@ func ParseOrderInputToOrderRequest(input qlub.OrderInput) dto.OrderRequest {
 	log.Printf("Converted orderReq is\n%v\n---------------------------------------", orderReq)
 
 	return orderReq
+}
+
+func ParseCreateOrderResponseToOrder(input *dto.CreateOrderRes) qlub.Order {
+	log.Printf("Parsing order response: %+v", input)
+	var order qlub.Order
+
+	order.TableID = input.OrderRes.ReferenceID
+	order.Hash = input.OrderRes.Id
+
+	log.Printf("Set order.TableID: %s, order.Hash: %s, order.Status: %s", order.TableID, order.Hash, order.Status)
+	for _, lineItem := range input.OrderRes.LineItems {
+		log.Printf("Processing lineItem: %+v", lineItem)
+
+		// Convert Quantity from string to int
+		quantity, err := strconv.Atoi(lineItem.Quantity)
+		if err != nil {
+			log.Printf("Error converting quantity to int: %v", err)
+			continue
+		}
+		log.Printf("Converted quantity: %d", quantity)
+
+		finalPrice := lineItem.BasePriceMoney.Amount * float64(quantity)
+		log.Printf("Calculated final price: %.2f", finalPrice)
+
+		order.Items = append(order.Items, qlub.OrderItem{
+			ID:         lineItem.UID,
+			Title:      lineItem.Name,
+			Quantity:   lineItem.Quantity,
+			UnitPrice:  strconv.FormatFloat(lineItem.BasePriceMoney.Amount, 'f', -1, 64),
+			BasePrice:  strconv.FormatFloat(lineItem.BasePriceMoney.Amount, 'f', -1, 64),
+			FinalPrice: strconv.FormatFloat(finalPrice, 'f', -1, 64),
+		})
+	}
+
+	log.Printf("Final order: %+v", order)
+	return order
 }

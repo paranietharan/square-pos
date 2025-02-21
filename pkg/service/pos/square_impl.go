@@ -90,12 +90,12 @@ func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.Creat
 	return dto.ParseCreateOrderResponse(orderResponse.OrderRes, request.TableID)
 }
 
-func (ps *PosStore) GetOrder(orderID string) (*dto.CreateOrderRes, error) {
+func (ps *PosStore) GetOrder(orderID string) (order qlub.Order, err error) {
 	url := fmt.Sprintf("https://connect.squareupsandbox.com/v2/orders/%s", orderID)
 
 	req, err := http.NewRequestWithContext(context.TODO(), "GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return qlub.Order{}, fmt.Errorf("error creating request: %v", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+config.GetEnv("ACCESS_TOKEN", ""))
@@ -105,20 +105,24 @@ func (ps *PosStore) GetOrder(orderID string) (*dto.CreateOrderRes, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error making request: %v", err)
+		return qlub.Order{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return qlub.Order{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	var orderResponse dto.CreateOrderRes
 	if err := json.NewDecoder(resp.Body).Decode(&orderResponse); err != nil {
-		return nil, fmt.Errorf("error decoding response: %v", err)
+		return qlub.Order{}, fmt.Errorf("error decoding response: %v", err)
 	}
 
-	return &orderResponse, nil
+	log.Printf("Order response : %v", orderResponse)
+
+	// convert the dto.CreateOrderRes to qlub.Order
+	re := parser.ParseCreateOrderResponseToOrder(&orderResponse)
+	return re, nil
 }
 
 func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error) {
@@ -158,21 +162,21 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 	return &paymentResponse, nil
 }
 
-func (ps *PosStore) GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error) {
-	order, err := GetOrdersByTableID(tableID, ps.db)
+// func (ps *PosStore) GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error) {
+// 	order, err := GetOrdersByTableID(tableID, ps.db)
 
-	var res []*dto.CreateOrderRes
+// 	var res []*dto.CreateOrderRes
 
-	for _, v := range order {
-		a, err := ps.GetOrder(v.OrderID)
+// 	for _, v := range order {
+// 		a, err := ps.GetOrder(v.OrderID)
 
-		if err != nil {
-			log.Println(err)
-			return res, err
-		}
+// 		if err != nil {
+// 			log.Println(err)
+// 			return res, err
+// 		}
 
-		res = append(res, a)
-	}
+// 		res = append(res, a)
+// 	}
 
-	return res, err
-}
+// 	return res, err
+// }
