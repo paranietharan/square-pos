@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -43,6 +44,12 @@ func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) error {
 		log.Fatalf("Error creating request: %v", err)
 		return err
 	}
+
+	if request.ID == "" && len(request.Products) == 0 {
+		log.Println("request empty")
+		return errors.New("the request is empty")
+	}
+
 	req.Header.Set("Authorization", "Bearer "+config.GetEnv("ACCESS_TOKEN", ""))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Square-Version", "2025-01-23")

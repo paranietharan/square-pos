@@ -57,8 +57,14 @@ func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Request get the input : %v\n\n", createOrderReq)
-	res := h.posStore.CreateOrder(createOrderReq, *user)
-	utils.WriteJSON(w, http.StatusCreated, res)
+
+	err = h.posStore.CreateOrder(createOrderReq, *user)
+
+	if err == nil {
+		utils.WriteJSON(w, http.StatusCreated, "success")
+	} else {
+		utils.WriteError(w, http.StatusCreated, err)
+	}
 }
 
 func (h *PosHandler) handleGetOrder(w http.ResponseWriter, r *http.Request) {
