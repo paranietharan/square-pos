@@ -125,7 +125,8 @@ func (ps *PosStore) GetOrder(orderID string) (order qlub.Order, err error) {
 	return re, nil
 }
 
-func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error) {
+func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*qlub.UpdatePaymentStatusCommand, error) {
+	var PaymentReq qlub.UpdatePaymentStatusCommand
 	url := "https://connect.squareupsandbox.com/v2/payments"
 
 	jsonData, err := json.Marshal(paymentReq)
@@ -159,7 +160,9 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentR
 	}
 	// Update submit paymets in the db
 	UpdatePaymentsInDB(paymentReq.OrderID, paymentReq.LocationID, ps.db)
-	return &paymentResponse, nil
+
+	PaymentReq = parser.ParsePaymentResponseToUpdatePaymentStatusCommand(paymentResponse)
+	return &PaymentReq, nil
 }
 
 // func (ps *PosStore) GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error) {

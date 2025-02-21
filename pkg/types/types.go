@@ -27,6 +27,6 @@ type UserStore interface {
 type PosStore interface {
 	CreateOrder(qlub.OrderInput, User) dto.CreateOrderResp
 	GetOrder(orderID string) (order qlub.Order, err error)
-	SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error)
+	SubmitPayments(paymentReq dto.PaymentRequest) (*qlub.UpdatePaymentStatusCommand, error)
 	//GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error)
 }

@@ -72,3 +72,14 @@ func ParseCreateOrderResponseToOrder(input *dto.CreateOrderRes) qlub.Order {
 	log.Printf("Final order: %+v", order)
 	return order
 }
+
+func ParsePaymentResponseToUpdatePaymentStatusCommand(input dto.PaymentResponse) qlub.UpdatePaymentStatusCommand {
+	var updatePaymentStatusCmd qlub.UpdatePaymentStatusCommand
+
+	updatePaymentStatusCmd.OrderID = input.Payment.ID
+	updatePaymentStatusCmd.BillAmount = strconv.FormatFloat(input.Payment.AmountMoney.Amount, 'f', -1, 64)
+	updatePaymentStatusCmd.TipAmount = strconv.FormatFloat(input.Payment.TotalMoney.Amount, 'f', -1, 64)
+	updatePaymentStatusCmd.TotalAmount = strconv.FormatFloat(input.Payment.TotalMoney.Amount, 'f', -1, 64)
+
+	return updatePaymentStatusCmd
+}
