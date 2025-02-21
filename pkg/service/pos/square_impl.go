@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"square-pos/pkg/config"
 	"square-pos/pkg/dto"
+	"square-pos/pkg/parser"
 	"square-pos/pkg/types"
-	"strconv"
 
-	"github.com/google/uuid"
+	"github.com/clubpay-pos-worker/sdk-go/v2/qlub"
 	"gorm.io/gorm"
 )
 
@@ -25,31 +25,33 @@ func NewPosStore(db *gorm.DB) *PosStore {
 	return &PosStore{db: db}
 }
 
-func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dto.CreateOrderResp {
-	productName := request.ProductName
-	qunatity := request.Quantity
-	amount := request.Amount
-	tableID := request.TableID
+func (ps *PosStore) CreateOrder(request qlub.OrderInput, u types.User) dto.CreateOrderResp {
+	// productName := request.ProductName
+	// qunatity := request.Quantity
+	// amount := request.Amount
+	// tableID := request.TableID
 
-	idempotencyKey := uuid.New().String()
-	qty := strconv.Itoa(qunatity)
-	orderReq := dto.OrderRequest{
-		IdempotencyKey: idempotencyKey,
-		Order: dto.Order{
-			LocationID: config.GetEnv("LOCATION_ID", ""),
-			LineItems: []dto.LineItem{
-				{
-					Name:     productName,
-					Quantity: qty,
-					BasePriceMoney: dto.Money{
-						Amount:   amount,
-						Currency: "USD",
-					},
-				},
-			},
-			ReferenceID: tableID,
-		},
-	}
+	// idempotencyKey := uuid.New().String()
+	// qty := strconv.Itoa(qunatity)
+	// orderReq := dto.OrderRequest{
+	// 	IdempotencyKey: idempotencyKey,
+	// 	Order: dto.Order{
+	// 		LocationID: config.GetEnv("LOCATION_ID", ""),
+	// 		LineItems: []dto.LineItem{
+	// 			{
+	// 				Name:     productName,
+	// 				Quantity: qty,
+	// 				BasePriceMoney: dto.Money{
+	// 					Amount:   amount,
+	// 					Currency: "USD",
+	// 				},
+	// 			},
+	// 		},
+	// 		ReferenceID: tableID,
+	// 	},
+	// }
+
+	orderReq := parser.ParseOrderInputToOrderRequest(request)
 
 	jsonData, err := json.Marshal(orderReq)
 	if err != nil {
@@ -83,7 +85,7 @@ func (ps *PosStore) CreateOrder(request dto.CreateOrderRequest, u types.User) dt
 	// fmt.Printf("Order Created Successfully: %+v\n", orderResponse)
 
 	// create order
-	CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, tableID, ps.db)
+	//CreateOrder(u, orderResponse.OrderRes.LocationID, orderResponse.OrderRes.Id, productName, qunatity, amount, tableID, ps.db)
 	//return orderResponse
 	return dto.ParseCreateOrderResponse(orderResponse.OrderRes, request.TableID)
 }

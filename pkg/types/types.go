@@ -2,6 +2,8 @@ package types
 
 import (
 	"square-pos/pkg/dto"
+
+	"github.com/clubpay-pos-worker/sdk-go/v2/qlub"
 )
 
 type RegisterUserPayload struct {
@@ -23,7 +25,7 @@ type UserStore interface {
 }
 
 type PosStore interface {
-	CreateOrder(dto.CreateOrderRequest, User) dto.CreateOrderResp
+	CreateOrder(qlub.OrderInput, User) dto.CreateOrderResp
 	GetOrder(orderID string) (*dto.CreateOrderRes, error)
 	SubmitPayments(paymentReq dto.PaymentRequest) (*dto.PaymentResponse, error)
 	GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error)

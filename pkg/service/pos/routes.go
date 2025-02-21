@@ -3,12 +3,14 @@ package pos
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"square-pos/pkg/dto"
 	"square-pos/pkg/service/auth"
 	"square-pos/pkg/types"
 	"square-pos/pkg/utils"
 
+	"github.com/clubpay-pos-worker/sdk-go/v2/qlub"
 	"github.com/gorilla/mux"
 )
 
@@ -47,11 +49,14 @@ func (h *PosHandler) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	// ----------------------------------
 
-	var createOrderReq dto.CreateOrderRequest
+	var createOrderReq qlub.OrderInput
+	//var createOrderReq dto.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&createOrderReq); err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 		return
 	}
+
+	log.Printf("Request get the input : %v\n\n", createOrderReq)
 	res := h.posStore.CreateOrder(createOrderReq, *user)
 	utils.WriteJSON(w, http.StatusCreated, res)
 }
