@@ -29,7 +29,7 @@ func NewPosHandler(posStore types.PosStore, userStore types.UserStore) *PosHandl
 func (h *PosHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/create-order", auth.WithJWTAuth(h.handleCreateOrder, h.userStore)).Methods("POST")
 	router.HandleFunc("/order/{id}", auth.WithJWTAuth(h.handleGetOrder, h.userStore)).Methods("GET")
-	//router.HandleFunc("/order/table/{id}", auth.WithJWTAuth(h.handleGetOrderByTable, h.userStore)).Methods("GET")
+	router.HandleFunc("/order/table/{id}", auth.WithJWTAuth(h.handleGetOrderByTable, h.userStore)).Methods("GET")
 	router.HandleFunc("/submit-payment", auth.WithJWTAuth(h.handleSubmitPayment, h.userStore)).Methods("POST")
 }
 
@@ -83,21 +83,21 @@ func (h *PosHandler) handleGetOrder(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, res)
 }
 
-// func (h *PosHandler) handleGetOrderByTable(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	orderID := vars["id"]
+func (h *PosHandler) handleGetOrderByTable(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	orderID := vars["id"]
 
-// 	res, _ := h.posStore.GetOrdersByTableID(orderID)
+	res, _ := h.posStore.GetOrdersByTableID(orderID)
 
-// 	if res == nil {
-// 		utils.WriteJSON(w, http.StatusNotFound, map[string]string{
-// 			"error": "Order not found",
-// 		})
-// 		return
-// 	}
+	if res == nil {
+		utils.WriteJSON(w, http.StatusNotFound, map[string]string{
+			"error": "Order not found",
+		})
+		return
+	}
 
-// 	utils.WriteJSON(w, http.StatusOK, res)
-// }
+	utils.WriteJSON(w, http.StatusOK, res)
+}
 
 func (h *PosHandler) handleSubmitPayment(w http.ResponseWriter, r *http.Request) {
 	var paymentReq dto.PaymentRequest

@@ -12,6 +12,7 @@ import (
 	"square-pos/pkg/dto"
 	"square-pos/pkg/parser"
 	"square-pos/pkg/types"
+	"strconv"
 
 	"github.com/clubpay-pos-worker/sdk-go/v2/qlub"
 	"gorm.io/gorm"
@@ -152,21 +153,21 @@ func (ps *PosStore) SubmitPayments(paymentReq dto.PaymentRequest) (*qlub.UpdateP
 	return &PaymentReq, nil
 }
 
-// func (ps *PosStore) GetOrdersByTableID(tableID string) ([]*dto.CreateOrderRes, error) {
-// 	order, err := GetOrdersByTableID(tableID, ps.db)
+func (ps *PosStore) GetOrdersByTableID(tableID string) (order *[]qlub.Order, err error) {
+	o, err := GetOrdersByTableID(tableID, ps.db)
+	var res []qlub.Order
 
-// 	var res []*dto.CreateOrderRes
+	if err != nil {
+		return &res, err
+	}
 
-// 	for _, v := range order {
-// 		a, err := ps.GetOrder(v.OrderID)
+	for _, v := range o {
+		res = append(res, qlub.Order{
+			ID:      strconv.Itoa(v.ID),
+			TableID: tableID,
+			Total:   strconv.FormatFloat(v.Total, 'f', -1, 64),
+		})
+	}
 
-// 		if err != nil {
-// 			log.Println(err)
-// 			return res, err
-// 		}
-
-// 		res = append(res, a)
-// 	}
-
-// 	return res, err
-// }
+	return &res, nil
+}
